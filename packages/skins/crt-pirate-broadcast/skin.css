@@ -1,0 +1,380 @@
+/* ============================================================
+   CRT PIRATE BROADCAST — skinforge Drop 1
+   Illegal signal. Intercepted transmission. You shouldn't be watching this.
+   DOM-verified selectors from Spotify Encore design system.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+/* ── Override Encore CSS variables — cascades everywhere ─── */
+:root,
+.encore-dark-theme {
+  --background-base:        #050a05 !important;
+  --background-highlight:   #0a140a !important;
+  --background-press:       #001a00 !important;
+  --background-elevated-base:    #080d08 !important;
+  --background-elevated-highlight: #0d170d !important;
+  --background-tinted-base:      #050a05 !important;
+  --background-tinted-highlight: #0a140a !important;
+  --background-unsafe-for-small-text-contrast: #050a05 !important;
+
+  --text-base:              #00ff41 !important;
+  --text-subdued:           #00aa2a !important;
+  --text-bright-accent:     #00ff41 !important;
+  --text-negative:          #ff2200 !important;
+  --text-warning:           #ffb000 !important;
+  --text-positive:          #00ff41 !important;
+
+  --essential-base:         #00ff41 !important;
+  --essential-subdued:      #00aa2a !important;
+  --essential-bright-accent:#00ff41 !important;
+  --essential-negative:     #ff2200 !important;
+  --essential-warning:      #ffb000 !important;
+  --essential-positive:     #00ff41 !important;
+
+  --decorative-base:        #003310 !important;
+  --decorative-subdued:     #001a00 !important;
+
+  /* Encore spacing and control vars left intact */
+}
+
+/* ── Global font ─────────────────────────────────────────── */
+* {
+  font-family: 'Share Tech Mono', 'Courier New', monospace !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* ── Scanline overlay ────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99999;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0,255,65,0.025) 2px,
+    rgba(0,255,65,0.025) 4px
+  );
+}
+
+/* Vignette */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99998;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0,0,0,0.65) 100%
+  );
+}
+
+/* ── Root layout ─────────────────────────────────────────── */
+.Root__main-view,
+.main-view-container,
+.main-view-container__scroll-node {
+  background: #050a05 !important;
+}
+
+/* ── Global nav bar (top bar) ────────────────────────────── */
+#global-nav-bar,
+[data-testid="global-nav-bar"] {
+  background: #020802 !important;
+  border-bottom: 1px solid #002200 !important;
+}
+
+/* Back/forward buttons */
+[data-testid="top-bar-back-button"],
+[data-testid="top-bar-forward-button"] {
+  color: #00aa2a !important;
+}
+
+/* Search input */
+[data-testid="search-input"] {
+  background: #001a00 !important;
+  border: 1px solid #003310 !important;
+  border-radius: 0 !important;
+  color: #00ff41 !important;
+  caret-color: #00ff41 !important;
+}
+
+[data-testid="search-input"]::placeholder {
+  color: #004d18 !important;
+}
+
+/* ── Left sidebar ────────────────────────────────────────── */
+#Desktop_LeftSidebar_Id,
+[id="Desktop_LeftSidebar_Id"] {
+  background: #020802 !important;
+  border-right: 1px solid #002200 !important;
+}
+
+/* Your Library header */
+.ctNLVWve8CosEgh2 {
+  background: #020802 !important;
+}
+
+/* Library rows */
+.gRYsquyVjoW12gob {
+  border-bottom: 1px solid #001500 !important;
+  transition: background 0.1s !important;
+}
+
+.gRYsquyVjoW12gob:hover {
+  background: #001a00 !important;
+}
+
+/* ── Now playing bar ─────────────────────────────────────── */
+[data-testid="now-playing-bar"],
+aside[aria-label="Now playing bar"] {
+  background: #020a02 !important;
+  border-top: 1px solid #003310 !important;
+  position: relative;
+}
+
+/* Now playing left section */
+.ZJCXNvTeX4pAS9rt {
+  position: relative;
+}
+
+/* Track title — flickers */
+[data-testid="context-item-info-title"],
+.encore-text[data-encore-id="listRowTitle"] {
+  color: #00ff41 !important;
+  text-shadow: 0 0 10px #00ff41, 0 0 20px #00aa2a !important;
+  animation: crt-flicker 7s infinite !important;
+}
+
+@keyframes crt-flicker {
+  0%   { opacity: 1;    text-shadow: 0 0 10px #00ff41; }
+  2%   { opacity: 0.82; text-shadow: none; }
+  4%   { opacity: 1;    text-shadow: 0 0 10px #00ff41; }
+  52%  { opacity: 1; }
+  54%  { opacity: 0.68; text-shadow: 0 0 2px #00ff41; }
+  56%  { opacity: 1;    text-shadow: 0 0 10px #00ff41; }
+  78%  { opacity: 1; }
+  80%  { opacity: 0.9; }
+  82%  { opacity: 1; }
+  100% { opacity: 1;    text-shadow: 0 0 10px #00ff41; }
+}
+
+/* ── Playback controls ───────────────────────────────────── */
+[data-testid="player-controls"] {
+  background: transparent !important;
+}
+
+[data-testid="control-button-playpause"] {
+  background: #001a00 !important;
+  border: 1px solid #003310 !important;
+  border-radius: 0 !important;
+  color: #00ff41 !important;
+}
+
+[data-testid="control-button-playpause"]:hover {
+  background: #003310 !important;
+  filter: drop-shadow(0 0 6px #00ff41) !important;
+}
+
+[data-testid="control-button-skip-back"],
+[data-testid="control-button-skip-forward"],
+[data-testid="control-button-shuffle"],
+[data-testid="control-button-repeat"],
+[data-testid="control-button-queue"] {
+  color: #00aa2a !important;
+}
+
+[data-testid="control-button-skip-back"]:hover,
+[data-testid="control-button-skip-forward"]:hover {
+  color: #00ff41 !important;
+  filter: drop-shadow(0 0 5px #00ff41) !important;
+}
+
+/* ── Progress bar ────────────────────────────────────────── */
+[data-testid="playback-progressbar"] .kPLEzaZADEAjWLC2 {
+  border-radius: 0 !important;
+}
+
+[data-testid="progress-bar-background"],
+.ikE27Bu2baQl9eex {
+  background: #001a00 !important;
+  border: 1px solid #003310 !important;
+  border-radius: 0 !important;
+  height: 5px !important;
+}
+
+/* Played portion */
+.u8BnskTQM8Dtq9DG {
+  background: #00ff41 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 8px #00ff41 !important;
+}
+
+/* Hover fill */
+.dbkoNhkHaGoGEWoY {
+  background: #00cc33 !important;
+  border-radius: 0 !important;
+}
+
+/* Progress handle */
+[data-testid="progress-bar-handle"],
+.RxlwJ6tCp4g6AAAH {
+  background: #00ff41 !important;
+  border-radius: 0 !important;
+  width: 3px !important;
+  box-shadow: 0 0 6px #00ff41 !important;
+}
+
+/* Playback time text */
+[data-testid="playback-position"],
+[data-testid="playback-duration"] {
+  color: #00aa2a !important;
+  font-size: 10px !important;
+}
+
+/* ── Volume bar ──────────────────────────────────────────── */
+[data-testid="volume-bar"] .ikE27Bu2baQl9eex {
+  background: #001a00 !important;
+  border: 1px solid #003310 !important;
+  border-radius: 0 !important;
+}
+
+[data-testid="volume-bar"] .u8BnskTQM8Dtq9DG {
+  background: #00aa2a !important;
+  border-radius: 0 !important;
+}
+
+/* ── Main content ────────────────────────────────────────── */
+.contentSpacing,
+.uwh85sg6FQGiXW5B {
+  background: transparent !important;
+}
+
+/* Section headings */
+.encore-text-title-small,
+[data-encore-id="listRowTitle"] h2 {
+  color: #00ff41 !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 0 6px #00aa2a !important;
+}
+
+/* Cards */
+[data-encore-id="card"],
+.e-10451-card {
+  background: #020a02 !important;
+  border: 1px solid #002200 !important;
+  border-radius: 0 !important;
+  transition: border-color 0.1s, box-shadow 0.1s !important;
+}
+
+[data-encore-id="card"]:hover,
+.e-10451-card:hover {
+  border-color: #00aa2a !important;
+  box-shadow: 0 0 10px #001a00 !important;
+}
+
+/* Card images — desaturate to CRT feel */
+[data-testid="card-image"],
+[data-testid="entity-image"] {
+  filter: contrast(1.1) saturate(0.25) sepia(0.3) !important;
+}
+
+/* Card play button */
+[data-testid="play-button"][data-encore-id="buttonPrimary"] {
+  background: #00ff41 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 12px #00aa2a !important;
+}
+
+/* Card titles and subtitles */
+[data-encore-id="cardTitle"] {
+  color: #00ff41 !important;
+}
+
+[data-encore-id="cardSubtitle"],
+[data-encore-id="cardSubtitle"] a {
+  color: #00aa2a !important;
+  text-decoration: none !important;
+}
+
+/* ── Chips (filter pills) ────────────────────────────────── */
+[data-encore-id="chip"] {
+  background: #001a00 !important;
+  border: 1px solid #003310 !important;
+  border-radius: 0 !important;
+  color: #00aa2a !important;
+}
+
+[data-encore-id="chip"][aria-checked="true"] .e-10451-legacy-chip__inner--selected {
+  background: #00aa2a !important;
+  color: #050a05 !important;
+}
+
+/* ── Scrollbars ──────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  background: #050a05;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #003310;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00aa2a;
+}
+
+/* ── Signal badge (mounted by extension.js) ──────────────── */
+#skinforge-signal {
+  position: fixed;
+  top: 10px;
+  right: 16px;
+  z-index: 100000;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: #00aa2a;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: signal-fade 9s infinite;
+}
+
+@keyframes signal-fade {
+  0%,100% { opacity: 0.7; }
+  25%      { opacity: 0.3; }
+  26%      { opacity: 0.8; }
+  65%      { opacity: 0.55; }
+  66%      { opacity: 0.9; }
+}
+
+/* ── Static overlay (triggered by extension.js) ──────────── */
+#skinforge-static {
+  position: fixed;
+  inset: 0;
+  z-index: 99997;
+  pointer-events: none;
+  opacity: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+  background-size: cover;
+  mix-blend-mode: screen;
+  transition: opacity 0.04s;
+}
+
+#skinforge-static.active {
+  opacity: 1;
+}
+
+/* ── EQ canvas (mounted by extension.js) ─────────────────── */
+#skinforge-eq {
+  position: absolute;
+  right: 200px;
+  top: 50%;
+  transform: translateY(-50%);
+  image-rendering: pixelated;
+  opacity: 0.9;
+  z-index: 10;
+}

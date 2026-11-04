@@ -1,0 +1,14 @@
+{
+  "name": "skinforge",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/patcher",
+    "packages/skins/*",
+    "packages/store",
+    "packages/manager"
+  ],
+  "scripts": {
+    "patcher": "npm run start --workspace=packages/patcher"
+  }
+}

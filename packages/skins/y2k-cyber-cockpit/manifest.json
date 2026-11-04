@@ -1,0 +1,12 @@
+{
+  "name": "Y2K Cyber Cockpit",
+  "id": "y2k-cyber-cockpit",
+  "codename": "VANGUARD",
+  "drop": 2,
+  "version": "1.1.0",
+  "description": "Your Spotify becomes a retro-futurist spacecraft cockpit. Y2K sci-fi. Music is navigation. Playback is propulsion.",
+  "css": "fonts.css",
+  "js": "app.js",
+  "extraCss": ["cockpit.css"],
+  "minSpotifyVersion": "1.2.0"
+}

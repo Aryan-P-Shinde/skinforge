@@ -1,0 +1,969 @@
+/* ============================================================
+   Y2K CYBER COCKPIT — skinforge Drop 2
+   Codename: VANGUARD OS v2.4.1
+   Your Spotify is now a spacecraft. Music is navigation.
+   ============================================================ */
+
+/* ── 01: EMBEDDED FONTS (CSP-safe, no external requests) ──── */
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400;
+  src: url('data:font/woff2;base64,${ORBITRON_400}') format('woff2');
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  src: url('data:font/woff2;base64,${ORBITRON_700}') format('woff2');
+}
+
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('data:font/woff2;base64,${SHARETECHMONO}') format('woff2');
+}
+
+/* ── 02: COLOR TOKENS ────────────────────────────────────── */
+:root {
+  --void:           #050B14;
+  --panel:          #0A1828;
+  --panel-mid:      #0F2438;
+  --accent-primary: #1BFFE4;
+  --accent-blue:    #4A9EFF;
+  --amber:          #FF9D2E;
+  --text-primary:   #C8E8F0;
+  --text-dim:       #3A6A7A;
+  --grid-line:      #0A2E3A;
+  --glass:          rgba(27, 255, 228, 0.06);
+
+  /* Genre accent — default INTERCEPTOR (teal), overridden by JS */
+  --genre-accent:   #1BFFE4;
+  --genre-label:    'INTERCEPTOR';
+  --genre-name:     'ELECTRONIC';
+
+  /* Spec: no Spotify green anywhere */
+  --spice-main: var(--void) !important;
+  --spice-sidebar: var(--panel) !important;
+  --spice-player: var(--panel) !important;
+  --spice-card: var(--panel-mid) !important;
+  --spice-button: var(--accent-primary) !important;
+  --spice-button-active: var(--accent-primary) !important;
+  --spice-text: var(--text-primary) !important;
+  --spice-subtext: var(--text-dim) !important;
+  --spice-highlight-elevated: var(--panel-mid) !important;
+}
+
+/* ── 03: GLOBAL RESET & BASE ─────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important; /* Spec: no rounded corners except album art max 4px */
+  font-style: normal !important; /* Spec: no italic */
+  letter-spacing: 0.12em;
+}
+
+/* Restore 4px max on album art (overrides the global reset) */
+.cover-art img,
+.main-trackInfo-coverArt img,
+[data-testid="cover-art-image"] {
+  border-radius: 4px !important;
+}
+
+body, html, #main {
+  background: var(--void) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Share Tech Mono', 'Courier New', monospace !important;
+}
+
+/* Kill Spotify's default green everywhere */
+.encore-bright-accent-set,
+[data-encore-id="buttonPrimary"],
+.x-toggle-indicatorKnob {
+  background-color: var(--accent-primary) !important;
+}
+
+/* ── 04: STRUCTURAL LAYOUT GRID ──────────────────────────── */
+/*
+  Target: root app container. Spotify uses .Root__top-container or
+  similar. We override display to grid: 32px status | content | 6px progress | 72px controls
+*/
+.Root__top-container {
+  display: grid !important;
+  grid-template-rows: 32px 1fr 6px 72px !important;
+  grid-template-columns: 220px 1fr 200px !important;
+  grid-template-areas:
+    "status  status  status"
+    "left    main    right"
+    "prog    prog    prog"
+    "controls controls controls" !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  background: var(--void) !important;
+}
+
+/* Nav sidebar → left panel */
+.Root__nav-bar,
+[data-testid="left-sidebar"] {
+  grid-area: left !important;
+  width: 220px !important;
+  min-width: 220px !important;
+  max-width: 220px !important;
+  background: var(--panel) !important;
+  border-right: 1px solid var(--grid-line) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Main content → main viewport */
+.Root__main-view,
+[data-testid="main-view"] {
+  grid-area: main !important;
+  background: var(--void) !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Now playing bar → controls */
+.Root__now-playing-bar,
+[data-testid="now-playing-bar"] {
+  grid-area: controls !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  background: var(--panel) !important;
+  border-top: 1px solid var(--grid-line) !important;
+}
+
+/* ── 05: CORNER BRACKET MIXIN (Gundam ref) ───────────────── */
+/* Applies to all panel containers */
+.Root__nav-bar::before,
+.Root__nav-bar::after,
+.Root__main-view::before,
+.Root__main-view::after,
+[data-testid="left-sidebar"]::before,
+[data-testid="left-sidebar"]::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--accent-primary);
+  border-style: solid;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.Root__nav-bar::before,
+[data-testid="left-sidebar"]::before {
+  top: 0; left: 0;
+  border-width: 2px 0 0 2px;
+}
+
+.Root__nav-bar::after,
+[data-testid="left-sidebar"]::after {
+  bottom: 0; left: 0;
+  border-width: 0 0 2px 2px;
+}
+
+.Root__main-view::before {
+  top: 0; right: 0;
+  border-width: 2px 2px 0 0;
+}
+
+.Root__main-view::after {
+  bottom: 0; right: 0;
+  border-width: 0 2px 2px 0;
+}
+
+/* ── 06A: STATUS BAR ─────────────────────────────────────── */
+#skinforge-status-bar {
+  grid-area: status;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--void);
+  border-bottom: 1px solid var(--grid-line);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  animation: statusPulse 4s ease-in-out infinite;
+  z-index: 200;
+  position: relative;
+}
+
+#skinforge-status-bar .sf-seg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#skinforge-status-bar .sf-pipe {
+  color: var(--grid-line);
+  margin: 0 6px;
+}
+
+#skinforge-status-bar .sf-ship-class {
+  color: var(--genre-accent);
+  font-weight: 700;
+}
+
+#skinforge-status-bar .sf-freq {
+  color: var(--accent-primary);
+}
+
+#skinforge-status-bar .sf-signal {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 10px;
+}
+
+#skinforge-status-bar .sf-signal span {
+  width: 2px;
+  background: var(--accent-primary);
+  display: block;
+}
+
+#skinforge-status-bar .sf-os {
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+/* ── 06B: LEFT INSTRUMENT PANEL ──────────────────────────── */
+.Root__nav-bar,
+[data-testid="left-sidebar"] {
+  position: relative;
+  padding: 0;
+}
+
+/* Sub-section headers */
+.sf-panel-header {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid var(--grid-line);
+  background: var(--panel);
+}
+
+/* Library / nav items */
+.main-navBar-navBarLink,
+[data-testid="nav-bar"] a {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+  color: var(--text-dim) !important;
+  text-transform: uppercase !important;
+  padding: 8px 12px !important;
+  display: block !important;
+  transition: background 120ms, color 120ms !important;
+  border-left: 2px solid transparent !important;
+}
+
+.main-navBar-navBarLink:hover,
+[data-testid="nav-bar"] a:hover {
+  background: var(--panel-mid) !important;
+  color: var(--text-primary) !important;
+}
+
+.main-navBar-navBarLink.active,
+[data-testid="nav-bar"] a[aria-current="page"] {
+  color: var(--text-primary) !important;
+  border-left-color: var(--accent-primary) !important;
+  background: var(--panel-mid) !important;
+}
+
+/* Playlist items in sidebar */
+.main-rootlist-rootlistItem,
+[data-testid="rootlist-item"] {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+  color: var(--text-dim) !important;
+}
+
+.main-rootlist-rootlistItem:hover,
+[data-testid="rootlist-item"]:hover {
+  background: var(--panel-mid) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Sys status bars — decorative telemetry (injected by JS) */
+#sf-sys-status {
+  padding: 10px 12px;
+  border-top: 1px solid var(--grid-line);
+}
+
+.sf-sys-bar-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sf-sys-bar-track {
+  height: 4px;
+  background: var(--grid-line);
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.sf-sys-bar-fill {
+  height: 100%;
+  background: rgba(27, 255, 228, 0.6);
+  transition: width 2s ease-in-out;
+}
+
+/* ── 06C: MAIN VIEWPORT ──────────────────────────────────── */
+.Root__main-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--void) !important;
+  position: relative;
+}
+
+/* Faint grid overlay — 10-unit measurement grid */
+.Root__main-view::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glass/phosphor overlay */
+.Root__main-view::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--glass);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Album art */
+.cover-art,
+[data-testid="cover-art"],
+.main-nowPlayingWidget-coverArt {
+  position: relative;
+  z-index: 2;
+  margin-top: 40px;
+}
+
+.cover-art img,
+[data-testid="cover-art-image"],
+.main-nowPlayingWidget-coverArt img {
+  width: 240px !important;
+  height: 240px !important;
+  box-shadow: 0 0 24px rgba(27, 255, 228, 0.25) !important;
+  border-radius: 4px !important;
+  filter: contrast(1.05) saturate(0.9) !important;
+}
+
+/* Corner brackets around album art */
+.cover-art::before,
+[data-testid="cover-art"]::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-primary);
+  border-left-color: var(--accent-primary);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.cover-art::after,
+[data-testid="cover-art"]::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 2px solid transparent;
+  border-bottom-color: var(--accent-primary);
+  border-right-color: var(--accent-primary);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Tactical display label below art */
+.sf-tactical-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-top: 6px;
+  text-align: center;
+  z-index: 2;
+  position: relative;
+}
+
+/* Track info block */
+.main-trackInfo-trackName,
+[data-testid="track-info-name"] {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  text-transform: none !important; /* title case — not all caps */
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  max-width: 400px !important;
+  z-index: 2;
+  position: relative;
+}
+
+.main-trackInfo-artists a,
+[data-testid="track-info-artists"] a,
+[data-testid="track-info-artist"] {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 13px !important;
+  color: var(--accent-blue) !important;
+  text-transform: uppercase !important;
+}
+
+/* Prefix injection handled by JS: "SIGNAL: Artist" and "SOURCE: Album" */
+.main-trackInfo-album,
+[data-testid="track-info-album"] {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+  color: var(--text-dim) !important;
+  text-transform: uppercase !important;
+}
+
+/* EQ Visualizer strip */
+#sf-eq-strip {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 20px;
+  margin-top: 16px;
+  background: var(--void);
+  border-top: 1px solid var(--grid-line);
+  border-bottom: 1px solid var(--grid-line);
+  overflow: hidden;
+}
+
+/* Horizontal grid lines on EQ strip background */
+#sf-eq-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 9px,
+    var(--grid-line) 10px
+  );
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.sf-eq-bar {
+  width: 6px;
+  min-height: 4px;
+  background: linear-gradient(to top, var(--accent-primary), var(--accent-blue));
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: height 60ms linear;
+}
+
+/* ── 06D: PROGRESS BAR (FUEL GAUGE) ──────────────────────── */
+.playback-progressbar,
+[data-testid="playback-progressbar"],
+.progress-bar {
+  grid-area: prog !important;
+  height: 6px !important;
+  background: var(--grid-line) !important;
+  position: relative !important;
+  cursor: pointer !important;
+}
+
+.playback-progressbar:hover,
+[data-testid="playback-progressbar"]:hover {
+  height: 10px !important;
+  transition: height 150ms ease !important;
+}
+
+.playback-bar--is-seekable .progress-bar__slider,
+[data-testid="progress-bar-slider"] {
+  display: none !important; /* hide default handle */
+}
+
+/* Diamond playhead — injected by JS as SVG */
+.progress-bar__fg,
+[data-testid="progress-bar-fill"] {
+  background: var(--accent-primary) !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+}
+
+/* Route Progress label — shown on hover via JS */
+#sf-route-label {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 150ms;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.playback-progressbar:hover #sf-route-label,
+[data-testid="playback-progressbar"]:hover + #sf-route-label {
+  opacity: 1;
+}
+
+/* Time displays flanking progress bar */
+.playback-bar__progress-time,
+[data-testid="playback-time"] {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+  color: var(--text-dim) !important;
+}
+
+/* ── 06E: PLAYER CONTROLS ────────────────────────────────── */
+.Root__now-playing-bar {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+}
+
+/* --- CENTER: Transport controls --- */
+.main-controls-parent,
+[data-testid="player-controls"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  justify-content: center !important;
+}
+
+/* Prev / Next — angular square buttons */
+[data-testid="control-button-skip-back"],
+[data-testid="control-button-skip-forward"] {
+  width: 32px !important;
+  height: 32px !important;
+  border: 1px solid var(--grid-line) !important;
+  background: transparent !important;
+  color: var(--text-dim) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+  transition: border-color 120ms, color 120ms !important;
+}
+
+[data-testid="control-button-skip-back"]:hover,
+[data-testid="control-button-skip-forward"]:hover {
+  border-color: var(--accent-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Play/Pause — hexagonal */
+[data-testid="control-button-playpause"] {
+  width: 44px !important;
+  height: 44px !important;
+  background: transparent !important;
+  border: 2px solid var(--accent-primary) !important;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%) !important;
+  color: var(--accent-primary) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: box-shadow 120ms !important;
+  border-radius: 0 !important;
+}
+
+[data-testid="control-button-playpause"][aria-label*="Pause"],
+[data-testid="control-button-playpause"].active {
+  box-shadow: 0 0 12px rgba(27, 255, 228, 0.5) !important;
+}
+
+/* --- RIGHT: Shuffle / Repeat toggle switches --- */
+[data-testid="control-button-shuffle"],
+[data-testid="control-button-repeat"] {
+  width: 32px !important;
+  height: 16px !important;
+  border-radius: 0 !important;
+  border: 1px solid var(--grid-line) !important;
+  background: var(--panel-mid) !important;
+  position: relative !important;
+  cursor: pointer !important;
+  transition: border-color 150ms, background 150ms !important;
+}
+
+[data-testid="control-button-shuffle"] svg,
+[data-testid="control-button-repeat"] svg {
+  display: none !important; /* hide default icons — labels via ::after */
+}
+
+[data-testid="control-button-shuffle"]::after {
+  content: 'RAND';
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-testid="control-button-repeat"]::after {
+  content: 'LOOP';
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-testid="control-button-shuffle"][aria-checked="true"],
+[data-testid="control-button-repeat"][aria-checked="true"],
+[data-testid="control-button-shuffle"].active,
+[data-testid="control-button-repeat"].active {
+  border-color: var(--accent-primary) !important;
+  background: rgba(27, 255, 228, 0.12) !important;
+}
+
+[data-testid="control-button-shuffle"][aria-checked="true"]::after,
+[data-testid="control-button-repeat"][aria-checked="true"]::after {
+  color: var(--accent-primary) !important;
+}
+
+/* --- LEFT: Throttle (volume) — handled by JS custom component --- */
+#sf-throttle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 40px;
+}
+
+#sf-throttle-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+#sf-throttle-track {
+  width: 2px;
+  height: 40px;
+  background: var(--grid-line);
+  position: relative;
+  cursor: pointer;
+}
+
+#sf-throttle-handle {
+  width: 16px;
+  height: 8px;
+  background: var(--accent-primary);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+  transition: top 80ms;
+}
+
+#sf-throttle-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-primary);
+}
+
+/* Hide Spotify's default volume slider */
+.volume-bar,
+[data-testid="volume-bar"],
+.playback-volume {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+}
+
+/* ── 06F: RIGHT INSTRUMENT PANEL ─────────────────────────── */
+#sf-right-panel {
+  grid-area: right;
+  width: 200px;
+  background: var(--panel);
+  border-left: 1px solid var(--grid-line);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* BPM Gauge */
+#sf-bpm-gauge-container {
+  padding: 12px;
+  border-bottom: 1px solid var(--grid-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#sf-bpm-canvas {
+  width: 120px;
+  height: 120px;
+}
+
+#sf-bpm-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+#sf-bpm-value {
+  font-family: 'Orbitron', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-top: 2px;
+}
+
+/* Genre badge */
+#sf-genre-badge {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--grid-line);
+  border-left: 3px solid var(--genre-accent);
+  background: rgba(27, 255, 228, 0.05);
+  transition: opacity 600ms, border-color 600ms, background 600ms;
+}
+
+#sf-genre-class {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--genre-accent);
+  text-transform: uppercase;
+}
+
+#sf-genre-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* Queue / Navigation Route */
+#sf-queue-container {
+  flex: 1;
+  padding: 0 12px 12px;
+  overflow: hidden;
+}
+
+#sf-queue-header {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  padding: 8px 0 6px;
+  border-bottom: 1px solid var(--grid-line);
+  margin-bottom: 8px;
+}
+
+#sf-queue-route-line {
+  position: relative;
+  padding-left: 20px;
+}
+
+#sf-queue-route-line::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  border-left: 1px dashed var(--grid-line);
+}
+
+.sf-waypoint {
+  position: relative;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: waypointIn 300ms ease forwards;
+}
+
+@keyframes waypointIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sf-waypoint::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  width: 8px;
+  height: 8px;
+  background: transparent;
+  border: 1px solid var(--grid-line);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.sf-waypoint.current::before {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.sf-waypoint-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* ── 06G: WARNING SYSTEM ─────────────────────────────────── */
+#sf-warning-toast {
+  position: fixed;
+  top: 40px;
+  right: 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 150ms;
+}
+
+#sf-warning-toast.active {
+  opacity: 1;
+}
+
+/* Bass flash — class toggled by JS on root */
+body.sf-bass-hit {
+  box-shadow: inset 0 0 0 2px var(--amber) !important;
+}
+
+/* Status bar amber flash on bass */
+body.sf-bass-hit #skinforge-status-bar {
+  background: rgba(255, 157, 46, 0.15) !important;
+  transition: background 80ms !important;
+}
+
+/* ── 07: MINIPLAYER ──────────────────────────────────────── */
+.mini-player,
+[data-testid="mini-player"] {
+  width: 320px !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  background: var(--panel) !important;
+  border: 1px solid var(--grid-line) !important;
+  border-left: 3px solid var(--genre-accent) !important;
+  box-shadow: 0 4px 24px rgba(27, 255, 228, 0.15) !important;
+  display: grid !important;
+  grid-template-rows: 1fr 3px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.mini-player::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 6px; height: 6px;
+  border-top: 2px solid var(--accent-primary);
+  border-left: 2px solid var(--accent-primary);
+  z-index: 10;
+}
+
+.mini-player::after {
+  content: '';
+  position: absolute;
+  bottom: 3px; right: 0;
+  width: 6px; height: 6px;
+  border-bottom: 2px solid var(--accent-primary);
+  border-right: 2px solid var(--accent-primary);
+  z-index: 10;
+}
+
+/* ── 08: SCAN LINE (loading state, replaces spinner) ─────── */
+@keyframes scanLine {
+  0%   { top: 0; }
+  100% { top: 100%; }
+}
+
+.sf-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent-primary);
+  opacity: 0.6;
+  animation: scanLine 600ms linear infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ── 09: SEARCH BAR ──────────────────────────────────────── */
+[data-testid="search-input"],
+.main-searchInput-searchInput,
+input[type="search"] {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 13px !important;
+  color: var(--text-primary) !important;
+  background: var(--panel-mid) !important;
+  border: 1px solid var(--grid-line) !important;
+  border-radius: 0 !important;
+}
+
+[data-testid="search-input"]::placeholder,
+.main-searchInput-searchInput::placeholder {
+  content: 'TARGET SCAN //' !important;
+  color: var(--text-dim) !important;
+}
+
+/* ── 10: REDUCED MOTION ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "CRT Pirate Broadcast",
+  "id": "crt-pirate-broadcast",
+  "version": "0.1.0",
+  "drop": 1,
+  "description": "An intercepted illegal TV signal. Static interference, flickering track names, radar-style EQ, fake signal instability.",
+  "css": "skin.css",
+  "js": "extension.js",
+  "targetAudience": "synthwave, phonk",
+  "author": "skinforge"
+}

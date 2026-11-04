@@ -1,0 +1,929 @@
+/* ============================================================
+   VANGUARD OS — cockpit.css
+   Shell overlay layout + all component styles.
+   React layout untouched. Shell is the real UI.
+   ============================================================ */
+
+/* ── 01: HIDE SPOTIFY NATIVE UI ──────────────────────────── */
+#main,
+.Root__top-container {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ── 02: COLOR TOKENS ────────────────────────────────────── */
+:root {
+  --void:           #050B14;
+  --panel:          #0A1828;
+  --panel-mid:      #0F2438;
+  --accent-primary: #1BFFE4;
+  --accent-blue:    #4A9EFF;
+  --amber:          #FF9D2E;
+  --text-primary:   #C8E8F0;
+  --text-dim:       #3A6A7A;
+  --grid-line:      #0A2E3A;
+  --glass:          rgba(27, 255, 228, 0.06);
+  --genre-accent:   #1BFFE4;
+}
+
+/* ── 03: SHELL CONTAINER ─────────────────────────────────── */
+#cockpit-shell,
+#cockpit-mini {
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--text-primary);
+  letter-spacing: 0.12em;
+  -webkit-font-smoothing: antialiased;
+}
+
+#cockpit-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  grid-template-rows: 32px 1fr 6px 72px;
+  grid-template-columns: 220px 1fr 200px;
+  background: var(--void);
+}
+
+#cockpit-mini {
+  display: none;
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 320px;
+  height: 80px;
+  z-index: 9999;
+  background: var(--panel);
+  border: 1px solid var(--grid-line);
+  border-left: 3px solid var(--genre-accent);
+  box-shadow: 0 4px 24px rgba(27, 255, 228, 0.15);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── 04: GLOBAL RULES FOR SHELL ──────────────────────────── */
+#cockpit-shell *,
+#cockpit-mini * {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+  font-style: normal !important;
+}
+
+/* Album art only exception */
+#shell-art-img {
+  border-radius: 4px !important;
+}
+
+/* No text shadows. No gradients except EQ. */
+#cockpit-shell *:not(.sf-eq-bar) {
+  text-shadow: none !important;
+}
+
+/* ── 05: GRID AREA ASSIGNMENTS ───────────────────────────── */
+#shell-status-bar  { grid-column: 1 / -1; grid-row: 1; }
+#shell-left-panel  { grid-column: 1;      grid-row: 2; }
+#shell-main        { grid-column: 2;      grid-row: 2; }
+#shell-right-panel { grid-column: 3;      grid-row: 2; }
+#shell-progress    { grid-column: 1 / -1; grid-row: 3; }
+#shell-controls    { grid-column: 1 / -1; grid-row: 4; }
+
+/* ── 06: CORNER BRACKET MIXIN ────────────────────────────── */
+.sf-bracketed {
+  position: relative;
+}
+
+.sf-bracketed::before,
+.sf-bracketed::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--accent-primary);
+  border-style: solid;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sf-bracketed::before { top: 0; left: 0;     border-width: 2px 0 0 2px; }
+.sf-bracketed::after  { bottom: 0; right: 0;  border-width: 0 2px 2px 0; }
+
+/* Small brackets (6px) for miniplayer and art */
+.sf-bracket-sm::before,
+.sf-bracket-sm::after {
+  width: 6px;
+  height: 6px;
+}
+
+/* Additional TR + BL corners via JS-injected spans */
+.sf-corner-tr,
+.sf-corner-bl {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--accent-primary);
+  border-style: solid;
+  pointer-events: none;
+  z-index: 10;
+}
+.sf-corner-tr { top: 0;    right: 0;  border-width: 2px 2px 0 0; }
+.sf-corner-bl { bottom: 0; left: 0;   border-width: 0 0 2px 2px; }
+
+/* ── 07A: STATUS BAR ──────────────────────────────────────── */
+#shell-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--void);
+  border-bottom: 1px solid var(--grid-line);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  animation: statusPulse 4s ease-in-out infinite;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1;   }
+  50%       { opacity: 0.7; }
+}
+
+.sf-status-seg { display: flex; align-items: center; gap: 8px; }
+.sf-status-pipe { color: var(--grid-line); margin: 0 4px; }
+
+#sf-status-class { color: var(--genre-accent); font-weight: 700; }
+#sf-status-freq  { color: var(--accent-primary); }
+#sf-status-os    { opacity: 0.7; }
+
+.sf-signal-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 10px;
+}
+.sf-signal-bars span {
+  width: 2px;
+  background: var(--accent-primary);
+  display: block;
+}
+
+/* ── 07B: LEFT PANEL ──────────────────────────────────────── */
+#shell-left-panel {
+  background: var(--panel);
+  border-right: 1px solid var(--grid-line);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sf-panel-section {
+  border-bottom: 1px solid var(--grid-line);
+  flex-shrink: 0;
+}
+
+.sf-panel-section:last-child { border-bottom: none; flex: 1; overflow: hidden; }
+
+.sf-section-header {
+  font-size: 9px;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  padding: 7px 12px 6px;
+  border-bottom: 1px solid var(--grid-line);
+  background: var(--panel);
+}
+
+/* Nav items */
+.sf-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background 120ms, color 120ms;
+  user-select: none;
+}
+
+.sf-nav-item:hover {
+  background: var(--panel-mid);
+  color: var(--text-primary);
+}
+
+.sf-nav-item.active {
+  background: var(--panel-mid);
+  color: var(--text-primary);
+  border-left-color: var(--accent-primary);
+}
+
+.sf-nav-badge {
+  font-size: 9px;
+  color: var(--accent-blue);
+  background: rgba(74, 158, 255, 0.12);
+  padding: 1px 4px;
+  flex-shrink: 0;
+}
+
+/* Mission log items */
+.sf-log-item {
+  padding: 6px 12px;
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid rgba(10, 46, 58, 0.5);
+}
+
+.sf-log-item:last-child { border-bottom: none; }
+.sf-log-idx { color: var(--accent-blue); margin-right: 6px; }
+
+/* SYS status bars */
+#sf-sys-status { padding: 10px 12px; }
+
+.sf-sys-row { margin-bottom: 10px; }
+.sf-sys-row:last-child { margin-bottom: 0; }
+
+.sf-sys-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.sf-sys-track {
+  height: 4px;
+  background: var(--grid-line);
+  position: relative;
+  overflow: hidden;
+}
+
+.sf-sys-fill {
+  height: 100%;
+  background: rgba(27, 255, 228, 0.6);
+}
+
+#sf-fill-hull   { animation: driftHull   8s  ease-in-out infinite; }
+#sf-fill-shield { animation: driftShield 11s ease-in-out infinite; }
+#sf-fill-fuel   { animation: driftFuel   14s ease-in-out infinite; }
+
+@keyframes driftHull   { 0%,100%{width:87%} 50%{width:82%} }
+@keyframes driftShield { 0%,100%{width:92%} 50%{width:88%} }
+@keyframes driftFuel   { 0%,100%{width:79%} 50%{width:74%} }
+
+/* ── 07C: MAIN VIEWPORT ──────────────────────────────────── */
+#shell-main {
+  background: var(--void);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Measurement grid overlay */
+#shell-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Phosphor glass overlay */
+#shell-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--glass);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* All main children above overlays */
+#shell-main > * { position: relative; z-index: 2; }
+
+/* Art container */
+#sf-art-container {
+  margin-top: 40px;
+  position: relative;
+  width: 240px;
+  height: 240px;
+  flex-shrink: 0;
+}
+
+#shell-art-img {
+  width: 240px;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 0 24px rgba(27, 255, 228, 0.25);
+  filter: contrast(1.05) saturate(0.9);
+  border-radius: 4px !important;
+  transition: opacity 400ms ease;
+}
+
+#shell-art-img.fading { opacity: 0; transition: opacity 200ms ease; }
+
+/* Art corner brackets */
+#sf-art-container::before { top: -8px;    left: -8px;  border-width: 2px 0 0 2px; }
+#sf-art-container::after  { bottom: -8px; right: -8px; border-width: 0 2px 2px 0; }
+
+#sf-art-tr { top: -8px;    right: -8px;  border-width: 2px 2px 0 0; }
+#sf-art-bl { bottom: -8px; left: -8px;   border-width: 0 0 2px 2px; }
+
+/* Tactical label */
+#sf-tactical-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Track info */
+#sf-track-info {
+  width: 400px;
+  max-width: 100%;
+  padding: 16px 20px 0;
+}
+
+#sf-track-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+#sf-track-artist {
+  font-size: 13px;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+#sf-track-album {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* EQ strip */
+#sf-eq-strip {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 20px;
+  margin-top: auto;
+  border-top: 1px solid var(--grid-line);
+  border-bottom: 1px solid var(--grid-line);
+  background: var(--void);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Horizontal grid lines on EQ */
+#sf-eq-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 9px,
+    var(--grid-line) 10px
+  );
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sf-eq-bar {
+  width: 6px;
+  min-height: 4px;
+  background: linear-gradient(to top, var(--accent-primary), var(--accent-blue));
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── 07D: PROGRESS BAR ───────────────────────────────────── */
+#shell-progress {
+  background: var(--grid-line);
+  height: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: height 150ms ease;
+}
+
+#shell-progress:hover { height: 10px; }
+
+#sf-progress-fill {
+  height: 100%;
+  background: var(--accent-primary);
+  position: absolute;
+  left: 0; top: 0;
+  width: 0%;
+  pointer-events: none;
+}
+
+/* Diamond playhead */
+#sf-progress-head {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--accent-primary);
+  transform: translate(-50%, -50%) rotate(45deg);
+  pointer-events: none;
+}
+
+/* Route label — shows on hover */
+#sf-route-label {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 150ms;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#shell-progress:hover #sf-route-label { opacity: 1; }
+
+/* Time readouts */
+.sf-time {
+  position: absolute;
+  top: -16px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+#sf-time-elapsed { left: 4px; }
+#sf-time-total   { right: 4px; }
+
+/* ── 07E: PLAYER CONTROLS ────────────────────────────────── */
+#shell-controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 20px;
+  background: var(--panel);
+  border-top: 1px solid var(--grid-line);
+  gap: 12px;
+}
+
+/* --- Left zone: Throttle --- */
+#sf-throttle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 40px;
+}
+
+#sf-throttle-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+#sf-throttle-track {
+  width: 2px;
+  height: 40px;
+  background: var(--grid-line);
+  position: relative;
+  cursor: pointer;
+}
+
+#sf-throttle-handle {
+  width: 16px;
+  height: 8px;
+  background: var(--accent-primary);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+  top: 0; /* updated by JS */
+}
+
+#sf-throttle-handle:active { cursor: grabbing; }
+
+#sf-throttle-value {
+  font-size: 11px;
+  color: var(--accent-primary);
+}
+
+/* Notch marks on throttle track */
+#sf-throttle-track::before {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 10%;
+  width: 4px;
+  height: 1px;
+  background: var(--grid-line);
+  box-shadow:
+    0 calc(40px * 0.2) 0 var(--grid-line),
+    0 calc(40px * 0.4) 0 var(--grid-line),
+    0 calc(40px * 0.6) 0 var(--grid-line),
+    0 calc(40px * 0.8) 0 var(--grid-line);
+}
+
+/* --- Center zone: Transport --- */
+#sf-transport {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sf-skip-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--grid-line);
+  background: transparent;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms;
+  flex-shrink: 0;
+}
+
+.sf-skip-btn:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+#sf-play-btn {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 2px solid var(--accent-primary);
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: box-shadow 120ms;
+  flex-shrink: 0;
+}
+
+#sf-play-btn.playing {
+  box-shadow: 0 0 12px rgba(27, 255, 228, 0.5);
+}
+
+#sf-play-btn svg,
+.sf-skip-btn svg {
+  pointer-events: none;
+}
+
+/* --- Right zone: Mode switches --- */
+#sf-mode-switches {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.sf-toggle {
+  width: 32px;
+  height: 16px;
+  border: 1px solid var(--grid-line);
+  background: var(--panel-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  transition: border-color 150ms, background 150ms, color 150ms;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.sf-toggle.on {
+  border-color: var(--accent-primary);
+  background: rgba(27, 255, 228, 0.12);
+  color: var(--accent-primary);
+}
+
+/* ── 07F: RIGHT PANEL ────────────────────────────────────── */
+#shell-right-panel {
+  background: var(--panel);
+  border-left: 1px solid var(--grid-line);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* BPM gauge */
+#sf-bpm-section {
+  padding: 12px;
+  border-bottom: 1px solid var(--grid-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+#sf-bpm-canvas {
+  width: 120px;
+  height: 120px;
+}
+
+#sf-bpm-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+#sf-bpm-value {
+  font-family: 'Orbitron', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-top: 2px;
+}
+
+/* Genre badge */
+#sf-genre-badge {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--grid-line);
+  border-left: 3px solid var(--genre-accent);
+  background: rgba(27, 255, 228, 0.05);
+  transition: opacity 600ms, border-color 600ms, background 600ms;
+  flex-shrink: 0;
+}
+
+#sf-genre-class {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--genre-accent);
+  text-transform: uppercase;
+}
+
+#sf-genre-name {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* Queue / route */
+#sf-queue-section {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#sf-queue-header {
+  font-size: 9px;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid var(--grid-line);
+  flex-shrink: 0;
+}
+
+#sf-queue-route {
+  flex: 1;
+  padding: 10px 12px 10px 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dashed vertical route line */
+#sf-queue-route::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--grid-line);
+}
+
+.sf-waypoint {
+  position: relative;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: waypointIn 300ms ease forwards;
+}
+
+@keyframes waypointIn { to { opacity: 1; transform: translateY(0); } }
+
+/* Diamond marker on route line */
+.sf-waypoint::before {
+  content: '';
+  position: absolute;
+  left: -17px;
+  width: 8px;
+  height: 8px;
+  background: transparent;
+  border: 1px solid var(--grid-line);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+  transition: background 300ms, border-color 300ms;
+}
+
+.sf-waypoint.current::before {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.sf-waypoint-name {
+  font-size: 10px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.sf-waypoint.current .sf-waypoint-name { color: var(--text-primary); }
+
+/* ── 07G: WARNING SYSTEM ─────────────────────────────────── */
+#sf-warning-toast {
+  position: fixed;
+  top: 36px;
+  right: 16px;
+  font-size: 11px;
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10000;
+  transition: opacity 100ms;
+}
+
+#sf-warning-toast.active { opacity: 1; }
+
+#cockpit-shell.sf-bass-hit {
+  box-shadow: inset 0 0 0 2px var(--amber) !important;
+}
+
+/* ── 08: MINIPLAYER ──────────────────────────────────────── */
+#cockpit-mini.visible {
+  display: flex;
+}
+
+#mini-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  overflow: hidden;
+}
+
+#mini-art {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--grid-line);
+}
+
+#mini-info { flex: 1; overflow: hidden; }
+
+#mini-track-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+#mini-artist {
+  font-size: 11px;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+#mini-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mini-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 120ms;
+}
+
+.mini-btn:hover { color: var(--accent-primary); }
+
+#mini-throttle {
+  width: 2px;
+  height: 20px;
+  background: var(--grid-line);
+  position: relative;
+  cursor: pointer;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+#mini-throttle-handle {
+  width: 10px;
+  height: 5px;
+  background: var(--accent-primary);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+}
+
+#mini-progress-bar {
+  height: 3px;
+  background: var(--grid-line);
+  flex-shrink: 0;
+  position: relative;
+}
+
+#mini-progress-fill {
+  height: 100%;
+  background: var(--accent-primary);
+  width: 0%;
+}
+
+/* Corner brackets for mini */
+#cockpit-mini::before { top: 0;  left: 0;  border-width: 2px 0 0 2px; border-color: var(--accent-primary); border-style: solid; }
+#cockpit-mini::after  { bottom: 3px; right: 0; border-width: 0 2px 2px 0; border-color: var(--accent-primary); border-style: solid; }
+#cockpit-mini::before, #cockpit-mini::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── 09: SCAN LINE (replaces spinner) ────────────────────── */
+.sf-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent-primary);
+  opacity: 0.6;
+  animation: scanLine 600ms linear infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+
+@keyframes scanLine { 0%{top:0} 100%{top:100%} }
+
+/* ── 10: REDUCED MOTION ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  #cockpit-shell *, #cockpit-mini * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

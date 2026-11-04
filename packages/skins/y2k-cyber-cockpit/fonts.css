@@ -1,0 +1,25 @@
+/* ============================================================
+   VANGUARD OS — fonts.css
+   Embedded fonts. No external requests. CSP-safe.
+   ============================================================ */
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400;
+  src: url('data:font/woff2;base64,${ORBITRON_400}') format('woff2');
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  src: url('data:font/woff2;base64,${ORBITRON_700}') format('woff2');
+}
+
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('data:font/woff2;base64,${SHARETECHMONO}') format('woff2');
+}
